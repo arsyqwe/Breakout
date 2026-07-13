@@ -1,5 +1,3 @@
-
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,20 +15,22 @@ public class Wall : MonoBehaviour
 
     void Start()
     {
+        wallWidth = GetComponent<SpriteRenderer>().bounds.size.x;
+        wallHeight = GetComponent<SpriteRenderer>().bounds.size.y;
         float halfScreenWidth = Camera.main.aspect * Camera.main.orthographicSize;
         maxX = halfScreenWidth - (wallWidth / 2f);
         minX = -halfScreenWidth + (wallWidth / 2f);
 
-        wallWidth = GetComponent<SpriteRenderer>().bounds.size.x;
-        wallHeight = GetComponent<SpriteRenderer>().bounds.size.y;
+        
     }
 
     void Update()
     {
-        Vector2 wallPos = transform.position;
-        float step = wallSpeed * Time.deltaTime;
+       Vector2 wallPos = transform.position;
+       float step = wallSpeed * Time.deltaTime;
        if (Keyboard.current.dKey.isPressed)
         {
+
          
             if (wallPos.x + step > maxX)
             {

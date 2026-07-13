@@ -103,59 +103,48 @@ public class Ball : MonoBehaviour
             }
         }
 
-        if(wall!= null && hitSomething == false)
+        if (wall != null && hitSomething == false)
         {
             Vector2 wallPos = wall.transform.position;
-            float wallFace = wallPos.y + (wall.wallHeight / 2f) + ballHalfHeight;
-            float rightPoint = wallPos.x + (wall.wallWidth / 2f) + ballHalfWidth;
-            float leftPoint = wallPos.x - (wall.wallWidth / 2f) - ballHalfWidth;
-            float wallBottom = wallPos.y - (wall.wallHeight / 2f) - ballHalfHeight;
-            
-            Vector2 rightBottom = new Vector2(rightPoint, wallBottom);
-            Vector2 leftBottom = new Vector2(leftPoint, wallBottom);
-            Vector2 rightTopPoint = new Vector2(rightPoint, wallFace);
-            Vector2 leftTopPoint = new Vector2(leftPoint, wallFace);
+            float halfW = wall.wallWidth / 2f;
+            float halfH = wall.wallHeight / 2f;
 
-            if (LineSegmentIntersection(currentPos, nextPos, rightTopPoint, leftTopPoint, out intersectionPoint))
+            Vector2 wMin = new Vector2(wallPos.x - halfW, wallPos.y - halfH);
+            Vector2 wMax = new Vector2(wallPos.x + halfW, wallPos.y + halfH);
+
+            Vector2 wTopLeft = new Vector2(wMin.x - ballHalfWidth, wMax.y + ballHalfHeight);
+            Vector2 wTopRight = new Vector2(wMax.x + ballHalfWidth, wMax.y + ballHalfHeight);
+            Vector2 wBottomLeft = new Vector2(wMin.x - ballHalfWidth, wMin.y - ballHalfHeight);
+            Vector2 wBottomRight = new Vector2(wMax.x + ballHalfWidth, wMin.y - ballHalfHeight);
+
+            if (direction.y < 0 && LineSegmentIntersection(currentPos, nextPos, wTopLeft, wTopRight, out intersectionPoint))
             {
-                if (direction.y < 0)
-                {
-                    float hit = intersectionPoint.x - wallPos.x;
-                    float hitValue = (hit / (wall.wallWidth / 2f)) * hitRange;
-                    hitValue = Mathf.Clamp(hitValue, -hitRange, hitRange);
+                float hit = intersectionPoint.x - wallPos.x;
+                float hitValue = (hit / halfW) * hitRange;
+                hitValue = Mathf.Clamp(hitValue, -hitRange, hitRange);
 
-                    float angle = hitValue ;
-                    float rad = hitValue * Mathf.Deg2Rad;
+                float rad = hitValue * Mathf.Deg2Rad;
 
-                
-                    direction = new Vector2(Mathf.Sin(rad), Mathf.Abs(Mathf.Cos(rad)));
-                    Debug.Log(angle);
-                    hitSomething = true;
-                }
+                direction = new Vector2(Mathf.Sin(rad), Mathf.Abs(Mathf.Cos(rad))).normalized;
+                hitSomething = true;
             }
-            else if (LineSegmentIntersection(currentPos, nextPos, rightTopPoint, rightBottom, out intersectionPoint))
+            else if (direction.x > 0 && LineSegmentIntersection(currentPos, nextPos, wBottomLeft, wTopLeft, out intersectionPoint))
             {
-                if (direction.x < 0)
+                direction.x = -direction.x;
+                if (transform.position.y > wallPos.y)
                 {
-                    direction.x = -direction.x;
-                    if (transform.position.y > wallPos.y)
-                    {
-                        direction.y = -direction.y;
-                    }
-                    hitSomething = true;
+                    direction.y = Mathf.Abs(direction.y);
                 }
+                hitSomething = true;
             }
-            else if (LineSegmentIntersection(currentPos, nextPos, leftTopPoint, leftBottom, out intersectionPoint))
+            else if (direction.x < 0 && LineSegmentIntersection(currentPos, nextPos, wBottomRight, wTopRight, out intersectionPoint))
             {
-                if (direction.x > 0)
+                direction.x = -direction.x;
+                if (transform.position.y > wallPos.y)
                 {
-                   direction.x = -direction.x;
-                    if (transform.position.y > wallPos.y)
-                    {
-                        direction.y = -direction.y;
-                    }
-                    hitSomething = true;
+                    direction.y = Mathf.Abs(direction.y);
                 }
+                hitSomething = true;
             }
 
             if (hitSomething)
@@ -163,8 +152,8 @@ public class Ball : MonoBehaviour
                 nextPos = intersectionPoint + (direction * 0.01f);
             }
         }
-        
-            if (nextPos.x + ballHalfWidth > maxX && direction.x > 0)
+
+        if (nextPos.x + ballHalfWidth > maxX && direction.x > 0)
             { 
                 float limitX = maxX - ballHalfWidth;
                 float overshoot = nextPos.x - limitX;

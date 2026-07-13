@@ -433,8 +433,6 @@ MonoBehaviour:
   wallSpeed: 15
   wallWidth: 0
   wallHeight: 0
-  ballRadius: 0.25
-  ballXwidth: 0
   screenRightEdge: 0
   screenLeftEdge: 0
 --- !u!212 &602653573
@@ -743,8 +741,8 @@ Transform:
   m_GameObject: {fileID: 1150711421}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.00671488, z: -0, w: 0.99997747}
-  m_LocalPosition: {x: 5.49, y: -5.3, z: -0.05}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalPosition: {x: 2.4917, y: -4.0106, z: -0.0098}
+  m_LocalScale: {x: 6.997269, y: 3.7879133, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
