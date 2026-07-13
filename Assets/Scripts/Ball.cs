@@ -34,7 +34,7 @@ public class Ball : MonoBehaviour
         Vector2 intersectionPoint = Vector2.zero;
         bool hitSomething = false;
 
-        if (brickManager != null && hitSomething == false)
+        if (hitSomething == false)
         {
             float closestDistance = float.MaxValue;
             BrickData closestBrick = null;
@@ -103,7 +103,7 @@ public class Ball : MonoBehaviour
             }
         }
 
-        if (wall != null && hitSomething == false)
+        if (hitSomething == false)
         {
             Vector2 wallPos = wall.transform.position;
             float halfW = wall.wallWidth / 2f;
@@ -182,9 +182,11 @@ public class Ball : MonoBehaviour
             }
        
             else if (nextPos.y - ballHalfHeight < minY)
-            {   
-                ResetBall();
-                return; 
+            {
+            float randomX = Random.Range(minX + 0.5f, maxX - 0.5f);
+            transform.position = new Vector3(randomX, 0f, 0f);
+            direction = new Vector2(Random.Range(-1f, 1f), -1f).normalized;
+            return; 
             }
             transform.position = nextPos;
     }
@@ -197,12 +199,7 @@ public class Ball : MonoBehaviour
         Gizmos.DrawLine(start, end);
     }
 
-    void ResetBall()
-    {
-        float randomX = Random.Range(minX + 0.5f, maxX - 0.5f);
-        transform.position = new Vector3(randomX, 0f, 0f);        
-        direction = new Vector2(Random.Range(-1f, 1f), -1f).normalized;
-    }
+ 
     bool LineSegmentIntersection(Vector2 start, Vector2 end, Vector2 start2, Vector2 end2, out Vector2 intersectionPoint)
     {
         Vector2 line1 = end - start; 
