@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,16 +13,15 @@ public class Wall : MonoBehaviour
     public float wallHeight;
     public float screenRightEdge;
     public float screenLeftEdge;
-
+    [NonSerialized]public Renderer rend;
     void Start()
     {
-        wallWidth = GetComponent<SpriteRenderer>().bounds.size.x;
-        wallHeight = GetComponent<SpriteRenderer>().bounds.size.y;
-        float halfScreenWidth = Camera.main.aspect * Camera.main.orthographicSize;
-        maxX = halfScreenWidth - (wallWidth / 2f);
-        minX = -halfScreenWidth + (wallWidth / 2f);
-
-        
+         rend = GetComponentInChildren<Renderer>();
+       // float halfScreenWidth = Camera.main.aspect * Camera.main.orthographicSize;
+       // maxX = halfScreenWidth - (wallWidth / 2f);    
+       // minX = -halfScreenWidth + (wallWidth / 2f);
+        wallHeight = rend.bounds.size.y;
+        wallWidth = rend.bounds.size.x;
     }
 
     void Update()
