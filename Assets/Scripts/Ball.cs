@@ -19,7 +19,16 @@ public class Ball : MonoBehaviour
     public Wall wall;
     public Brick brickManager;
 
-    public GameObject brickDestroyEffectPrefab;
+    public GameObject particleRed;
+    public GameObject particleOrange;
+    public GameObject particleYellow;
+    public GameObject particleGreen;
+    public GameObject particleBlue;
+    public GameObject particleDarkBlue;
+    public GameObject particlePurple;
+    public GameObject particlePink;
+
+   
     public GameObject ballHittingWallEffectPrefab;
 
     void Start()
@@ -102,9 +111,21 @@ public class Ball : MonoBehaviour
                 direction = newDirection;
                 closestBrick.isDestroyed = true;
 
-                if (brickDestroyEffectPrefab != null)
+                GameObject correctPrefab = null;
+                string color = closestBrick.colorName;
+
+                if (color.Contains("red")) correctPrefab = particleRed;
+                else if (color.Contains("orange")) correctPrefab = particleOrange;
+                else if (color.Contains("yellow")) correctPrefab = particleYellow;
+                else if (color.Contains("green")) correctPrefab = particleGreen;
+                else if (color.Contains("dark_blue")) correctPrefab = particleDarkBlue; 
+                else if (color.Contains("blue")) correctPrefab = particleBlue;
+                else if (color.Contains("purple")) correctPrefab = particlePurple;
+                else if (color.Contains("pink")) correctPrefab = particlePink;
+
+                if (correctPrefab != null)
                 {
-                    GameObject effect = Instantiate(brickDestroyEffectPrefab, closestPoint, Quaternion.identity);
+                    GameObject effect = Instantiate(correctPrefab, closestPoint, Quaternion.identity);
                     Destroy(effect, 2f);
                 }
 
@@ -213,8 +234,9 @@ public class Ball : MonoBehaviour
 
     public void SpawnWallEffect(Vector2 spawnPoint)
     {
-       GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
-       Destroy(effect, 2f); 
+            GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
+            Destroy(effect, 2f);
+      
     }
 
     public void OnDrawGizmos()

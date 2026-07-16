@@ -5958,7 +5958,14 @@ MonoBehaviour:
   hitRange: 30
   wall: {fileID: 602653572}
   brickManager: {fileID: 0}
-  brickDestroyEffectPrefab: {fileID: 3393226542913319686, guid: 997c28466340c1946a2680ce9f771c35, type: 3}
+  particleRed: {fileID: 3588485820603825707, guid: 83e29c5939d614b4cb42d1c1b37aa76c, type: 3}
+  particleOrange: {fileID: 8674444348552149363, guid: b2766c59ef3519a429c1a90dcef22d6e, type: 3}
+  particleYellow: {fileID: 1289768899857584264, guid: db47d19ff07419544818b3e654164d55, type: 3}
+  particleGreen: {fileID: 2100018955268689828, guid: 85cac81bddb2cfc4b9af6bbfb03892f0, type: 3}
+  particleBlue: {fileID: 8008955263174223565, guid: 8986d91067b2bf24eaa4455a6a54c3f1, type: 3}
+  particleDarkBlue: {fileID: 7345740336518192188, guid: 0f5a1e2a30db81c449524a2553566550, type: 3}
+  particlePurple: {fileID: 375508695523365371, guid: cd2cfadce0471ce4490580b8921c626b, type: 3}
+  particlePink: {fileID: 2911823404780001550, guid: 7b95f22f456fded4593a64f6255dd65d, type: 3}
   ballHittingWallEffectPrefab: {fileID: 7470557275673169136, guid: 0fec32bae6dcb8f4a9d7c52790528d50, type: 3}
 --- !u!4 &1150711424
 Transform:
@@ -5969,7 +5976,7 @@ Transform:
   m_GameObject: {fileID: 1150711421}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.00671488, z: -0, w: 0.99997747}
-  m_LocalPosition: {x: 6.84, y: -3.77, z: -0.08}
+  m_LocalPosition: {x: 0, y: -3.77, z: 0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
