@@ -20,7 +20,7 @@ public class Brick : MonoBehaviour
             foreach (Transform brickTransform in categoryFolder)
             {
                 GameObject brickObj = brickTransform.gameObject;
-                if (!brickObj.activeSelf) continue;
+                
 
                 Renderer rend = brickObj.GetComponentInChildren<Renderer>();
                 if (rend != null)

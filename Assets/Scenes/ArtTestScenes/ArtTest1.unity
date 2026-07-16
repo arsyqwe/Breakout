@@ -5949,13 +5949,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91cdd36d25dfc4e4fbe9d1b8356505c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ball
-  ballSpeed: 15
+  ballSpeed: 30
   maxX: 7.698
   minX: -7.698
-  maxY: 13.63
-  minY: -13.63
+  maxY: 11.195
+  minY: -13.677
   direction: {x: 0, y: -1}
-  hitRange: 30
+  hitRange: 25
   wall: {fileID: 602653572}
   brickManager: {fileID: 0}
   particleRed: {fileID: 3588485820603825707, guid: 83e29c5939d614b4cb42d1c1b37aa76c, type: 3}
@@ -5976,7 +5976,7 @@ Transform:
   m_GameObject: {fileID: 1150711421}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.00671488, z: -0, w: 0.99997747}
-  m_LocalPosition: {x: 0, y: -3.77, z: 0.01}
+  m_LocalPosition: {x: 0, y: -6.73, z: 0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
