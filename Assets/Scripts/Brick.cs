@@ -7,20 +7,26 @@ public class Brick : MonoBehaviour
     public float ballRadius;
     public float ballXwidth;
     public List<BrickData> bricks = new List<BrickData>();
-    public GameObject brickPrefab;
+
     void Start()
-    { 
-        for (int i = 0; i < 10; i++)
+    {
+        foreach (Transform categoryFolder in transform)
         {
-            for (int j = 0; j < 5; j++)
+            foreach (Transform brickTransform in categoryFolder)
             {
-                Vector2 pos = new Vector2(-7.2f + (i * 1.6f), 10f + (j * 1f));
-                Vector2 size = new Vector2(1.4f, 0.8f);
+                GameObject brickObj = brickTransform.gameObject;
 
-                GameObject image = Instantiate(brickPrefab, pos, Quaternion.identity);
-                image.transform.localScale = size;
+                if (!brickObj.activeSelf) continue;
 
-                bricks.Add(new BrickData(pos, size, image ));
+                Renderer rend = brickObj.GetComponentInChildren<Renderer>();
+
+                if (rend != null)
+                {
+                    Vector2 pos = rend.bounds.center;
+                    Vector2 size = rend.bounds.size;
+
+                    bricks.Add(new BrickData(pos, size, brickObj));
+                }
             }
         }
     }

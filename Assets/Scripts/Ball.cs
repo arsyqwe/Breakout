@@ -14,17 +14,22 @@ public class Ball : MonoBehaviour
     public float minY;
     [NonSerialized] public float ballHalfWidth;
     [NonSerialized] public float ballHalfHeight;
-    public Vector2 direction = new Vector2 (0,0);
+    public Vector2 direction = new Vector2(0, 0);
     public float hitRange;
     public Wall wall;
     public Brick brickManager;
 
+    public GameObject brickDestroyEffectPrefab;
+    public GameObject ballHittingWallEffectPrefab;
+
     void Start()
     {
-        wall = FindObjectOfType<Wall>();
-        brickManager = FindObjectOfType<Brick>();
-        ballHalfHeight = transform.localScale.y / 2f;
-        ballHalfWidth = transform.localScale.x / 2f;
+        wall = FindFirstObjectByType<Wall>();
+        brickManager = FindFirstObjectByType<Brick>();
+
+        Renderer rend = GetComponentInChildren<Renderer>();
+        ballHalfWidth = rend.bounds.extents.x;
+        ballHalfHeight = rend.bounds.extents.y;
     }
 
     void Update()
@@ -42,26 +47,26 @@ public class Ball : MonoBehaviour
             Vector2 newDirection = direction;
 
             foreach (BrickData brick in brickManager.bricks)
-            { 
+            {
                 if (brick.isDestroyed)
                 {
-                    continue;   
+                    continue;
                 }
-                
-                Vector2 bTopLeft = new Vector2(brick.min.x  - ballHalfWidth, brick.max.y + ballHalfHeight);
-                Vector2 bTopRight = new Vector2(brick.max.x +ballHalfWidth, brick.max.y + ballHalfHeight);
+
+                Vector2 bTopLeft = new Vector2(brick.min.x - ballHalfWidth, brick.max.y + ballHalfHeight);
+                Vector2 bTopRight = new Vector2(brick.max.x + ballHalfWidth, brick.max.y + ballHalfHeight);
                 Vector2 bBottomLeft = new Vector2(brick.min.x - ballHalfWidth, brick.min.y - ballHalfHeight);
-                Vector2 bBottomRight = new Vector2(brick.max.x +ballHalfWidth, brick.min.y -ballHalfHeight);
+                Vector2 bBottomRight = new Vector2(brick.max.x + ballHalfWidth, brick.min.y - ballHalfHeight);
 
                 bool collided = false;
                 Vector2 tempDirection = direction;
 
                 if (direction.y > 0 && LineSegmentIntersection(currentPos, nextPos, bBottomLeft, bBottomRight, out intersectionPoint))
                 {
-                   tempDirection.y = -tempDirection.y;
-                   collided = true;
+                    tempDirection.y = -tempDirection.y;
+                    collided = true;
                 }
-                else  if (direction.y < 0 && LineSegmentIntersection(currentPos, nextPos, bTopLeft, bTopRight, out intersectionPoint))
+                else if (direction.y < 0 && LineSegmentIntersection(currentPos, nextPos, bTopLeft, bTopRight, out intersectionPoint))
                 {
                     tempDirection.y = -tempDirection.y;
                     collided = true;
@@ -96,9 +101,14 @@ public class Ball : MonoBehaviour
                 hitSomething = true;
                 direction = newDirection;
                 closestBrick.isDestroyed = true;
-                Destroy(closestBrick.image);
 
-             
+                if (brickDestroyEffectPrefab != null)
+                {
+                    GameObject effect = Instantiate(brickDestroyEffectPrefab, closestPoint, Quaternion.identity);
+                    Destroy(effect, 2f);
+                }
+
+                Destroy(closestBrick.image);
                 nextPos = closestPoint + direction * 0.01f;
             }
         }
@@ -127,6 +137,8 @@ public class Ball : MonoBehaviour
 
                 direction = new Vector2(Mathf.Sin(rad), Mathf.Abs(Mathf.Cos(rad))).normalized;
                 hitSomething = true;
+
+                SpawnWallEffect(intersectionPoint);
             }
             else if (direction.x > 0 && LineSegmentIntersection(currentPos, nextPos, wBottomLeft, wTopLeft, out intersectionPoint))
             {
@@ -136,6 +148,8 @@ public class Ball : MonoBehaviour
                     direction.y = Mathf.Abs(direction.y);
                 }
                 hitSomething = true;
+
+                SpawnWallEffect(intersectionPoint);
             }
             else if (direction.x < 0 && LineSegmentIntersection(currentPos, nextPos, wBottomRight, wTopRight, out intersectionPoint))
             {
@@ -145,6 +159,8 @@ public class Ball : MonoBehaviour
                     direction.y = Mathf.Abs(direction.y);
                 }
                 hitSomething = true;
+
+                SpawnWallEffect(intersectionPoint);
             }
 
             if (hitSomething)
@@ -153,56 +169,65 @@ public class Ball : MonoBehaviour
             }
         }
 
-        if (nextPos.x + ballHalfWidth > maxX && direction.x > 0)
-            { 
-                float limitX = maxX - ballHalfWidth;
-                float overshoot = nextPos.x - limitX;
+        if (nextPos.x > maxX && direction.x > 0)
+        {
+            float limitX = maxX;
+            float overshoot = nextPos.x - limitX;
 
-                direction.x = -direction.x;
-                nextPos.x = limitX - overshoot;
-            }
-        
-            else if (nextPos.x - ballHalfWidth < minX && direction.x < 0)
-            {
-                float limitX = minX + ballHalfWidth;
-                float overshoot = limitX - nextPos.x;
+            direction.x = -direction.x;
+            nextPos.x = limitX - overshoot;
 
-                direction.x = -direction.x;
-                nextPos.x = limitX + overshoot;
-            }
+            SpawnWallEffect(new Vector2(maxX, nextPos.y));
+        }
+        else if (nextPos.x < minX && direction.x < 0)
+        {
+            float limitX = minX;
+            float overshoot = limitX - nextPos.x;
 
-           
-            if (nextPos.y + ballHalfHeight > maxY && direction.y > 0)
-            { 
-                float limitY = maxY - ballHalfHeight;
-                float overshoot = nextPos.y - limitY;
+            direction.x = -direction.x;
+            nextPos.x = limitX + overshoot;
 
-                direction.y = -direction.y; 
-                nextPos.y = limitY - overshoot;
-            }
-       
-            else if (nextPos.y - ballHalfHeight < minY)
-            {
+            SpawnWallEffect(new Vector2(minX, nextPos.y));
+        }
+
+        if (nextPos.y > maxY && direction.y > 0)
+        {
+            float limitY = maxY;
+            float overshoot = nextPos.y - limitY;
+
+            direction.y = -direction.y;
+            nextPos.y = limitY - overshoot;
+
+            SpawnWallEffect(new Vector2(nextPos.x, maxY));
+        }
+        else if (nextPos.y < minY)
+        {
             float randomX = Random.Range(minX + 0.5f, maxX - 0.5f);
             transform.position = new Vector3(randomX, 0f, 0f);
             direction = new Vector2(Random.Range(-1f, 1f), -1f).normalized;
-            return; 
-            }
-            transform.position = nextPos;
+            return;
+        }
+
+        transform.position = nextPos;
     }
 
-    private void OnDrawGizmos()
+    public void SpawnWallEffect(Vector2 spawnPoint)
+    {
+       GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
+       Destroy(effect, 2f); 
+    }
+
+    public void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        Vector3 start =transform.position;
+        Vector3 start = transform.position;
         Vector3 end = start + (Vector3)(direction * 3f);
         Gizmos.DrawLine(start, end);
     }
 
- 
     bool LineSegmentIntersection(Vector2 start, Vector2 end, Vector2 start2, Vector2 end2, out Vector2 intersectionPoint)
     {
-        Vector2 line1 = end - start; 
+        Vector2 line1 = end - start;
         Vector2 line2 = end2 - start2;
         float determinant = line1.x * line2.y - line1.y * line2.x;
 
