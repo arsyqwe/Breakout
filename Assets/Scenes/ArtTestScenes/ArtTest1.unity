@@ -6221,12 +6221,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91cdd36d25dfc4e4fbe9d1b8356505c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Ball
-  ballSpeed: 30
+  ballSpeed: 10
   maxX: 7.698
   minX: -7.698
   maxY: 11.195
   minY: -13.677
-  direction: {x: 0, y: -1}
+  direction: {x: 1, y: 1}
   hitRange: 25
   wall: {fileID: 602653572}
   brickManager: {fileID: 0}
@@ -6238,6 +6238,8 @@ MonoBehaviour:
   particleDarkBlue: {fileID: 7345740336518192188, guid: 0f5a1e2a30db81c449524a2553566550, type: 3}
   particlePurple: {fileID: 375508695523365371, guid: cd2cfadce0471ce4490580b8921c626b, type: 3}
   particlePink: {fileID: 2911823404780001550, guid: 7b95f22f456fded4593a64f6255dd65d, type: 3}
+  originalScale: {x: 0, y: 0, z: 0}
+  targetScale: {x: 0, y: 0, z: 0}
   ballHittingWallEffectPrefab: {fileID: 7470557275673169136, guid: 0fec32bae6dcb8f4a9d7c52790528d50, type: 3}
 --- !u!4 &1150711424
 Transform:
@@ -6248,7 +6250,7 @@ Transform:
   m_GameObject: {fileID: 1150711421}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.00671488, z: -0, w: 0.99997747}
-  m_LocalPosition: {x: 0, y: -6.73, z: 0.01}
+  m_LocalPosition: {x: 0, y: -0.99, z: 0.01}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

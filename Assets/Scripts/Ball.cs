@@ -27,8 +27,10 @@ public class Ball : MonoBehaviour
     public GameObject particleDarkBlue;
     public GameObject particlePurple;
     public GameObject particlePink;
+    
+    public Vector3 originalScale;
+    public Vector3 targetScale;
 
-   
     public GameObject ballHittingWallEffectPrefab;
 
     void Start()
@@ -39,6 +41,10 @@ public class Ball : MonoBehaviour
         Renderer rend = GetComponentInChildren<Renderer>();
         ballHalfWidth = rend.bounds.extents.x;
         ballHalfHeight = rend.bounds.extents.y;
+        originalScale = transform.localScale;
+
+ 
+        targetScale = originalScale;
     }
 
     void Update()
@@ -47,6 +53,8 @@ public class Ball : MonoBehaviour
         Vector2 nextPos = currentPos + (ballSpeed * direction * Time.deltaTime);
         Vector2 intersectionPoint = Vector2.zero;
         bool hitSomething = false;
+
+        targetScale = new Vector3(originalScale.x * 0.85f, originalScale.y * 1.15f, originalScale.z);
 
         if (hitSomething == false)
         {
@@ -111,6 +119,9 @@ public class Ball : MonoBehaviour
                 direction = newDirection;
                 closestBrick.isDestroyed = true;
 
+                targetScale = new Vector3(originalScale.x * 1.4f, originalScale.y * 0.6f, originalScale.z);
+                transform.localScale = targetScale;
+
                 GameObject correctPrefab = null;
                 string color = closestBrick.colorName;
 
@@ -118,7 +129,7 @@ public class Ball : MonoBehaviour
                 else if (color.Contains("orange")) correctPrefab = particleOrange;
                 else if (color.Contains("yellow")) correctPrefab = particleYellow;
                 else if (color.Contains("green")) correctPrefab = particleGreen;
-                else if (color.Contains("dark_blue")) correctPrefab = particleDarkBlue; 
+                else if (color.Contains("dark_blue")) correctPrefab = particleDarkBlue;
                 else if (color.Contains("blue")) correctPrefab = particleBlue;
                 else if (color.Contains("purple")) correctPrefab = particlePurple;
                 else if (color.Contains("pink")) correctPrefab = particlePink;
@@ -225,18 +236,26 @@ public class Ball : MonoBehaviour
         {
             float randomX = Random.Range(minX + 0.5f, maxX - 0.5f);
             transform.position = new Vector3(randomX, 0f, 0f);
-            direction = new Vector2(Random.Range(-1f, 1f), -1f).normalized;
+            Vector2 targetDirection = ((Vector2)wall.transform.position - (Vector2)transform.position).normalized;
+            direction = targetDirection;
+
             return;
         }
 
         transform.position = nextPos;
+
+
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
     }
 
     public void SpawnWallEffect(Vector2 spawnPoint)
     {
-            GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
-            Destroy(effect, 2f);
-      
+        GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
+        Destroy(effect, 2f);
+
+       
+        targetScale = new Vector3(originalScale.x * 1.5f, originalScale.y * 0.5f, originalScale.z);
+        transform.localScale = targetScale;
     }
 
     public void OnDrawGizmos()
