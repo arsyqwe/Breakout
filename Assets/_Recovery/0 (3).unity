@@ -3954,16 +3954,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 94a942b4f171e354c8535db5d2548aeb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Wall
-  maxX: 6.186
-  minX: -6.189
-  wallSpeed: 15
+  maxX: 6.182
+  minX: -6.182
+  wallSpeed: 20
   wallWidth: 0
   wallHeight: 0
   screenRightEdge: 0
   screenLeftEdge: 0
-  maxTiltAngle: 20
-  springFrequency: 25
-  springDuration: 0.5
 --- !u!1001 &603622231
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6233,7 +6230,7 @@ MonoBehaviour:
   hitRange: 25
   wall: {fileID: 602653572}
   brickManager: {fileID: 0}
-  effectAngle: 60
+  effectAngle: 30
   particleRed: {fileID: 3588485820603825707, guid: 83e29c5939d614b4cb42d1c1b37aa76c, type: 3}
   particleOrange: {fileID: 8674444348552149363, guid: b2766c59ef3519a429c1a90dcef22d6e, type: 3}
   particleYellow: {fileID: 1289768899857584264, guid: db47d19ff07419544818b3e654164d55, type: 3}
@@ -6257,7 +6254,7 @@ Transform:
   m_GameObject: {fileID: 1150711421}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: 0.00671488, z: -0, w: 0.99997747}
-  m_LocalPosition: {x: 0, y: 0, z: 0.069}
+  m_LocalPosition: {x: -3.56, y: -0.65, z: 0.11}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -12916,7 +12913,7 @@ Transform:
   m_GameObject: {fileID: 919132149574988171}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -6.189, y: -11.29, z: 0}
+  m_LocalPosition: {x: 0, y: -11.29, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

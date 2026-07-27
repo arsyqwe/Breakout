@@ -1,7 +1,6 @@
 using System;
-using System.Runtime.CompilerServices;
+using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.InputSystem;
 using Random = UnityEngine.Random;
 
 [DefaultExecutionOrder(0)]
@@ -18,6 +17,7 @@ public class Ball : MonoBehaviour
     public float hitRange;
     public Wall wall;
     public Brick brickManager;
+    public float effectAngle = 60f;
 
     public GameObject particleRed;
     public GameObject particleOrange;
@@ -27,11 +27,15 @@ public class Ball : MonoBehaviour
     public GameObject particleDarkBlue;
     public GameObject particlePurple;
     public GameObject particlePink;
-    
     public Vector3 originalScale;
     public Vector3 targetScale;
 
     public GameObject ballHittingWallEffectPrefab;
+
+    public float shakeTimer;
+    public Vector3 cameraStartPos;
+
+    public TrailRenderer myTrail;
 
     void Start()
     {
@@ -42,9 +46,11 @@ public class Ball : MonoBehaviour
         ballHalfWidth = rend.bounds.extents.x;
         ballHalfHeight = rend.bounds.extents.y;
         originalScale = transform.localScale;
-
- 
         targetScale = originalScale;
+
+        cameraStartPos = Camera.main.transform.position;
+
+        myTrail = GetComponentInChildren<TrailRenderer>();
     }
 
     void Update()
@@ -65,10 +71,7 @@ public class Ball : MonoBehaviour
 
             foreach (BrickData brick in brickManager.bricks)
             {
-                if (brick.isDestroyed)
-                {
-                    continue;
-                }
+                if (brick.isDestroyed) continue;
 
                 Vector2 bTopLeft = new Vector2(brick.min.x - ballHalfWidth, brick.max.y + ballHalfHeight);
                 Vector2 bTopRight = new Vector2(brick.max.x + ballHalfWidth, brick.max.y + ballHalfHeight);
@@ -116,10 +119,9 @@ public class Ball : MonoBehaviour
             if (closestBrick != null)
             {
                 hitSomething = true;
-                direction = newDirection;
                 closestBrick.isDestroyed = true;
 
-                targetScale = new Vector3(originalScale.x * 1.4f, originalScale.y * 0.6f, originalScale.z);
+                targetScale = new Vector3(originalScale.x * 1.5f, originalScale.y * 0.5f, originalScale.z);
                 transform.localScale = targetScale;
 
                 GameObject correctPrefab = null;
@@ -136,12 +138,66 @@ public class Ball : MonoBehaviour
 
                 if (correctPrefab != null)
                 {
-                    GameObject effect = Instantiate(correctPrefab, closestPoint, Quaternion.identity);
+                    GameObject effect = Instantiate(correctPrefab, closestBrick.image.transform.position, Quaternion.identity);
                     Destroy(effect, 2f);
                 }
 
+                float waveSpeed = 50f;
+                float maxMagnitude = 0.25f;
+                float falloffDistance = 45f;
+                Vector2 brokenBrickPos = closestBrick.originalPosition;
+
+                Vector2 pushDirection = direction.normalized;
+
+                foreach (BrickData otherBrick in brickManager.bricks)
+                {
+                    if (otherBrick.isDestroyed || otherBrick == closestBrick) continue;
+
+                    Vector2 toOtherBrick = otherBrick.originalPosition - (Vector2)transform.position;
+                    float distance = toOtherBrick.magnitude;
+
+                
+                    float edgeTolerance = Mathf.Atan2(1.5f, distance) * Mathf.Rad2Deg;
+
+                  
+                    if (Vector2.Angle(pushDirection, toOtherBrick) > effectAngle + edgeTolerance) continue;
+
+                    float diffY = toOtherBrick.y;
+                    float adjustedDistance = Mathf.Max(0f, distance - 2.0f);
+
+                    float proximityFactor = Mathf.Clamp01(1f - (distance / falloffDistance));
+                    float smoothProximity = proximityFactor * proximityFactor;
+
+                    float verticalDampening = 1f;
+                    float extraDelay = 0f;
+
+                    if (diffY > 0)
+                    {
+                        verticalDampening = Mathf.Clamp01(1f - (diffY / 8f));
+                        extraDelay = diffY * 0.02f;
+                    }
+
+                    otherBrick.currentMagnitude = maxMagnitude * smoothProximity * verticalDampening;
+                    otherBrick.waveDelay = (adjustedDistance / waveSpeed) + extraDelay;
+                    otherBrick.shakeDirection = pushDirection;
+                    otherBrick.shakeTimer = 0.25f;
+
+                    float drawLength = 12f;
+
+                    Vector3 start = transform.position;
+                    Vector3 currentDir = direction.normalized;
+                    Vector3 leftBoundary = Quaternion.Euler(0, 0, -effectAngle) * currentDir;
+                    Vector3 rightBoundary = Quaternion.Euler(0, 0, effectAngle) * currentDir;
+
+                    Debug.DrawRay(start, leftBoundary * drawLength, Color.red, 2f);
+                    Debug.DrawRay(start, rightBoundary * drawLength, Color.red, 2f);
+                }
+
                 Destroy(closestBrick.image);
+
+                direction = newDirection;
                 nextPos = closestPoint + direction * 0.01f;
+                shakeTimer = 0.15f;
             }
         }
 
@@ -159,6 +215,7 @@ public class Ball : MonoBehaviour
             Vector2 wBottomLeft = new Vector2(wMin.x - ballHalfWidth, wMin.y - ballHalfHeight);
             Vector2 wBottomRight = new Vector2(wMax.x + ballHalfWidth, wMin.y - ballHalfHeight);
 
+            
             if (direction.y < 0 && LineSegmentIntersection(currentPos, nextPos, wTopLeft, wTopRight, out intersectionPoint))
             {
                 float hit = intersectionPoint.x - wallPos.x;
@@ -168,17 +225,21 @@ public class Ball : MonoBehaviour
                 float rad = hitValue * Mathf.Deg2Rad;
 
                 direction = new Vector2(Mathf.Sin(rad), Mathf.Abs(Mathf.Cos(rad))).normalized;
-                hitSomething = true;
+                hitSomething = true;   
+                float normalizedHit = Mathf.Clamp(hit / halfW, -1f, 1f); 
+                wall.TriggerSpringTilt(normalizedHit);
 
                 SpawnWallEffect(intersectionPoint);
             }
             else if (direction.x > 0 && LineSegmentIntersection(currentPos, nextPos, wBottomLeft, wTopLeft, out intersectionPoint))
             {
                 direction.x = -direction.x;
+
                 if (transform.position.y > wallPos.y)
                 {
                     direction.y = Mathf.Abs(direction.y);
                 }
+
                 hitSomething = true;
 
                 SpawnWallEffect(intersectionPoint);
@@ -186,10 +247,12 @@ public class Ball : MonoBehaviour
             else if (direction.x < 0 && LineSegmentIntersection(currentPos, nextPos, wBottomRight, wTopRight, out intersectionPoint))
             {
                 direction.x = -direction.x;
+
                 if (transform.position.y > wallPos.y)
                 {
                     direction.y = Mathf.Abs(direction.y);
                 }
+
                 hitSomething = true;
 
                 SpawnWallEffect(intersectionPoint);
@@ -238,14 +301,17 @@ public class Ball : MonoBehaviour
             transform.position = new Vector3(randomX, 0f, 0f);
             Vector2 targetDirection = ((Vector2)wall.transform.position - (Vector2)transform.position).normalized;
             direction = targetDirection;
-
+            myTrail.Clear();
             return;
         }
 
         transform.position = nextPos;
 
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
 
-        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 10f);
+        transform.localScale = Vector3.Lerp(transform.localScale, targetScale, Time.deltaTime * 15f);
+        myTrail.widthMultiplier = transform.localScale.x;
     }
 
     public void SpawnWallEffect(Vector2 spawnPoint)
@@ -253,17 +319,26 @@ public class Ball : MonoBehaviour
         GameObject effect = Instantiate(ballHittingWallEffectPrefab, spawnPoint, Quaternion.identity);
         Destroy(effect, 2f);
 
-       
         targetScale = new Vector3(originalScale.x * 1.5f, originalScale.y * 0.5f, originalScale.z);
         transform.localScale = targetScale;
     }
 
     public void OnDrawGizmos()
     {
+        float drawLength = 12f;
         Gizmos.color = Color.yellow;
         Vector3 start = transform.position;
-        Vector3 end = start + (Vector3)(direction * 3f);
+        Vector3 end = start + (Vector3)(direction * drawLength);
         Gizmos.DrawLine(start, end);
+
+        Vector3 currentDir = direction.normalized;
+
+        Vector3 leftBoundary = Quaternion.Euler(0, 0, -effectAngle) * currentDir;
+        Vector3 rightBoundary = Quaternion.Euler(0, 0, effectAngle) * currentDir;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawRay(start, leftBoundary * drawLength);
+        Gizmos.DrawRay(start, rightBoundary * drawLength);
     }
 
     bool LineSegmentIntersection(Vector2 start, Vector2 end, Vector2 start2, Vector2 end2, out Vector2 intersectionPoint)
@@ -277,6 +352,7 @@ public class Ball : MonoBehaviour
             intersectionPoint = Vector2.zero;
             return false;
         }
+
         float rat2 = ((start2.x - start.x) * line1.y - (start2.y - start.y) * line1.x) / determinant;
         float rat1 = ((start2.x - start.x) * line2.y - (start2.y - start.y) * line2.x) / determinant;
 
@@ -285,6 +361,7 @@ public class Ball : MonoBehaviour
             intersectionPoint = start + (rat1 * line1);
             return true;
         }
+
         intersectionPoint = Vector2.zero;
         return false;
     }
